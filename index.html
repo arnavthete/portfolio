@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Arnav's Core</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Press+Start+2P&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#050507;
+    --card:#0f0f12;
+    --neon:#ff2e2e;
+    --neon-2:#86e3ce; /* enable-audio button color */
+    --muted:#98a0b3;
+    --glass: rgba(255,255,255,0.03);
+    --glass-2: rgba(255,255,255,0.02);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:#e6eef8;font-family:Inter,Orbitron,system-ui,Arial}
+  a {color:inherit;text-decoration:none}
+  img {max-width:100%;display:block}
+
+  /* Canvas is full-bleed background */
+  #bgCanvas{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    filter: blur(5px); /* blur the background so it doesn't interfere with text */
+    opacity:0.92;      /* tone down slightly */
+  }
+
+  /* subtle vignette */
+  body::after{
+    content:'';position:fixed;inset:0;pointer-events:none;
+    background: radial-gradient(60% 60% at 20% 10%, rgba(255,255,255,0.01), transparent),
+                linear-gradient(0deg, rgba(0,0,0,0.45), transparent 35%);
+    z-index:1;
+  }
+
+  /* Nav */
+  nav{
+    position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:18px;
+    padding:14px 20px;background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.15));
+    backdrop-filter: blur(6px);border-bottom:1px solid rgba(255,46,46,0.06)
+  }
+  .logo-wrap{display:flex;align-items:center;gap:12px}
+  .logo-wrap img{height:48px;border-radius:8px;filter:drop-shadow(0 4px 18px rgba(255,46,46,0.06))}
+  .nav-links{margin-left:auto;display:flex;gap:12px;align-items:center}
+  .nav-links a{padding:8px 12px;border-radius:8px;font-weight:600;color:var(--muted);transition:all .18s}
+  .nav-links a:hover{color:#fff;transform:translateY(-2px)}
+  /* BUTTON FIX: ensure buttons are visible (dark translucent background + white text) */
+  .btn-ghost{
+    border:1px solid rgba(255,255,255,0.06);
+    padding:8px 10px;
+    border-radius:8px;
+    color:#fff;
+    background: rgba(255,255,255,0.02);
+    transition: all .18s;
+    cursor: pointer;
+  }
+  .btn-ghost:hover{
+    background: rgba(255,255,255,0.04);
+    transform: translateY(-2px);
+    color:#fff;
+  }
+  .small-muted{font-size:0.82rem;color:var(--muted)}
+
+  /* Hero */
+  header.hero{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px 20px;position:relative;z-index:5}
+  .hero h1{font-family:'Press Start 2P',sans-serif;color:var(--neon);font-size:1.35rem;margin:10px 0;text-shadow:0 0 12px rgba(255,46,46,0.12)}
+  .hero p{max-width:900px;margin:12px 0 22px;color:var(--muted);font-size:1.02rem;line-height:1.45}
+
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+  /* Layout sections */
+  .container{max-width:1100px;margin:0 auto;padding:36px 20px;z-index:6;position:relative}
+  section{margin-bottom:36px}
+
+  /* Projects grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+  .card{
+    background:linear-gradient(180deg,var(--glass),var(--glass-2));
+    border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.6);position:relative;overflow:hidden;
+    transition:transform .28s,box-shadow .28s;cursor:pointer
+  }
+  .card:hover{transform:translateY(-8px);box-shadow:0 16px 42px rgba(0,0,0,0.7)}
+  .card .title{font-family:Orbitron,Inter;font-weight:700;margin-bottom:8px;color:#fff}
+  .card .desc{color:var(--muted);font-size:0.95rem;margin-bottom:12px}
+
+  /* Neon border flicker */
+  .card::after{
+    content:'';position:absolute;inset:0;border-radius:12px;padding:1px;
+    background:linear-gradient(90deg, rgba(255,46,46,0.9), rgba(134,227,206,0.65));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;opacity:.08;pointer-events:none;
+    transition:opacity .25s;
+  }
+  .card:hover::after{opacity:0.18;filter:blur(6px)}
+
+  .meta{display:flex;gap:10px;align-items:center;font-size:0.85rem;color:var(--muted)}
+
+  /* Modal details */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(1,1,1,0.6);display:none;align-items:center;justify-content:center;z-index:60}
+  .modal{width:min(920px,96%);background:#08080a;border-radius:12px;padding:22px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.75)}
+  .modal h3{font-family:Orbitron;margin:0 0 8px}
+  .modal .close{position:absolute;right:18px;top:18px;cursor:pointer;color:var(--muted)}
+
+  /* About / Timeline */
+  .about-grid{display:grid;grid-template-columns:1fr 320px;gap:20px}
+  .timeline{background:linear-gradient(180deg,var(--glass),transparent);padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+  .timeline-item{padding:12px;border-left:3px solid rgba(255,46,46,0.12);margin-bottom:12px}
+
+  /* Skills */
+  .skills{display:flex;gap:10px;flex-wrap:wrap}
+  .chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted);font-weight:600;font-size:0.85rem;border:1px solid rgba(255,255,255,0.02)}
+
+  /* Contact (social icons) */
+  .socials{display:flex;gap:14px;align-items:center;justify-content:center}
+  .soc-btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);color:var(--muted);transition:all .15s}
+  .soc-btn svg{width:18px;height:18px;display:block}
+  .soc-btn:hover{transform:translateY(-4px);color:#fff}
+
+  /* Footer neon grid */
+  footer{padding:26px 20px;border-top:1px solid rgba(255,255,255,0.03);text-align:center;color:var(--muted)}
+  .gridline{height:56px;background:repeating-linear-gradient(90deg, rgba(255,46,46,0.06) 0 4px, transparent 4px 40px);opacity:0.04;margin-top:12px;border-radius:6px}
+
+  /* Easter egg lights */
+  #lights{position:fixed;top:0;left:0;right:0;height:74px;display:flex;align-items:center;justify-content:center;z-index:70;pointer-events:none;opacity:0;transition:opacity .6s}
+  .lights-row{width:100%;height:68px;background-image:linear-gradient(90deg, transparent 0 2%, rgba(255,255,255,0.03) 2% 6%);background-size:48px 100%}
+  .lights-on{opacity:1;pointer-events:none;filter:drop-shadow(0 6px 28px rgba(255,46,46,0.18))}
+
+  @media (max-width:880px){
+    .about-grid{grid-template-columns:1fr}
+    .nav-links{display:none}
+    .hero h1{font-size:1.05rem}
+  }
+
+  /* ENABLE AUDIO BUTTON (center top, different colour) */
+  #enableAudioBtn {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.2);
+    background: var(--neon-2);
+    color: #041016;
+    font-weight:700;
+    display: none;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+  }
+</style>
+</head>
+<body>
+
+<!-- Background canvas (stars/nebula) -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- faint drifting 'creature' shadow -->
+<div class="shadow-figure" id="shadow"></div>
+
+<!-- christmas lights (hidden until Konami) -->
+<div id="lights"><div class="lights-row"></div></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo-wrap">
+    <!-- your logo from the git URL -->
+    <img src="https://raw.githubusercontent.com/arnavthete/me/refs/heads/main/arnavscorelogo.png" alt="Arnav's Core logo" id="siteLogo" onerror="this.style.opacity=0.9">
+  </div>
+
+  <div class="nav-links">
+    <a href="#projects">Projects</a>
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <img src="https://raw.githubusercontent.com/arnavthete/me/refs/heads/main/arnavscorelogo.png" alt="Arnav logo" style="height:110px;max-width:70%;object-fit:contain" id="heroLogo">
+  <!-- paragraph first -->
+  <p>Projects, timeline, and hidden easter eggs. Explore or press the Konami code.</p>
+  <!-- ENTER THE CORE below that paragraph -->
+  <h1 class="glitch">ENTER THE CORE</h1>
+
+  <div class="hero-cta">
+    <a class="btn-ghost" href="#projects">View Projects</a>
+    <a class="btn-ghost" href="#contact">Get In Touch</a>
+  </div>
+</header>
+
+<!-- MAIN CONTAINER -->
+<main class="container">
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <h2 style="font-family:Orbitron">Projects</h2>
+    <div class="grid" id="projectsGrid">
+      <!-- card: Omega (now redirects directly) -->
+      <div class="card" data-project="omega" id="omegaCard">
+        <div class="title">Ω Omega</div>
+        <div class="desc">Custom Minecraft server — minigames, economy, community events and custom plugins.</div>
+        <div class="meta"><span>Java / Spigot</span><span> • </span><span>Community</span></div>
+      </div>
+
+      <!-- card: Paper Vault (redirects directly) -->
+      <div class="card" data-project="papervault" id="paperCard">
+        <div class="title">📚 The Paper Vault</div>
+        <div class="desc">Educational portal for past papers, sample tests, and revision notes.</div>
+        <div class="meta"><span>HTML/CSS/JS</span><span> • </span><span>Education</span></div>
+      </div>
+
+      <!-- card: future -->
+      <div class="card" data-project="future" id="futureCard">
+        <div class="title">🔮 Future Projects</div>
+        <div class="desc">Experimental projects, bots, and secret prototypes — coming soon.</div>
+        <div class="meta"><span>Prototype</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT + TIMELINE -->
+  <section id="about">
+    <h2 style="font-family:Orbitron">About & Timeline</h2>
+    <div class="about-grid">
+      <div>
+        <div style="background:linear-gradient(180deg,var(--glass),transparent);padding:14px;border-radius:10px;margin-bottom:16px">
+          <strong style="font-family:Orbitron">Hi — I'm Arnav.</strong>
+          <p class="small-muted" style="margin:8px 0 0">I build Minecraft worlds, educational sites, and creative internet experiments. I blend retro aesthetics with modern workflow.</p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item"><strong>2022</strong> — Started Omega: a small server with a tight community.</div>
+          <div class="timeline-item"><strong>2024</strong> — Launched The Paper Vault (coursework & sample papers).</div>
+          <div class="timeline-item"><strong>2025</strong> — Revamped site with refreshed theme.</div>
+        </div>
+      </div>
+
+      <!-- Contact next to timeline removed as requested -->
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <h2 style="font-family:Orbitron">Skills & Tools</h2>
+    <div class="skills" style="margin-top:12px">
+      <span class="chip">Java</span>
+      <span class="chip">Spigot/Bukkit</span>
+      <span class="chip">HTML • CSS • JS</span>
+      <span class="chip">Node.js</span>
+      <span class="chip">Git & GitHub</span>
+      <span class="chip">Figma</span>
+      <span class="chip">Photoshop</span>
+    </div>
+  </section>
+
+  <!-- CONTACT (section with socials remains) -->
+  <section id="contact">
+    <h2 style="font-family:Orbitron">Contact</h2>
+    <div style="text-align:center">
+      <div class="socials" style="margin-top:12px">
+        <a class="soc-btn" href="https://instagram.com/darealarnav" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg>
+          <span>@darealarnav</span>
+        </a>
+
+        <a class="soc-btn" href="https://x.com/manlyarnav" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 4L20 20M20 4L4 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span>@manlyarnav</span>
+        </a>
+
+        <a class="soc-btn" href="mailto:arnav.og.16@gmail.com">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>arnav.og.16@gmail.com</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- modal backdrop -->
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-hidden="true">
+  <div class="modal" id="modalBox">
+    <div style="position:relative">
+      <div class="close" onclick="closeModal()" style="position:absolute;right:8px;top:8px;cursor:pointer;color:var(--muted)">✕</div>
+      <h3 id="modalTitle">Project</h3>
+    </div>
+    <p id="modalBody" class="small-muted" style="margin-top:10px">Details</p>
+    <div style="margin-top:12px"><a id="modalLink" class="btn-ghost" href="#" target="_blank">Open</a></div>
+  </div>
+</div>
+
+<footer>
+  <div>© 2025 Arnav's Core</div>
+  <div class="gridline" aria-hidden="true"></div>
+</footer>
+
+<!-- Background music: placed here and will attempt autoplay at 50% volume -->
+<audio id="eggAudio" src="audio/st.mp3" preload="auto" loop playsinline></audio>
+
+<!-- enable audio fallback button (center top, different colour) -->
+<button id="enableAudioBtn" aria-hidden="true">Enable audio</button>
+
+<script>
+/* Single-file enhanced script (autoplay attempt + fallback button center-top,
+   blurred canvas, Konami, direct redirects for Omega & PaperVault, socials clickable,
+   removed Toggle Alternate View) */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---------- Audio: try autoplay at 50% ---------- */
+  const eggAudio = document.getElementById('eggAudio');
+  const enableBtn = document.getElementById('enableAudioBtn');
+
+  function showEnableBtn() {
+    if (!enableBtn) return;
+    enableBtn.style.display = 'block';
+    enableBtn.setAttribute('aria-hidden','false');
+  }
+  function hideEnableBtn() {
+    if (!enableBtn) return;
+    enableBtn.style.display = 'none';
+    enableBtn.setAttribute('aria-hidden','true');
+  }
+
+  async function tryPlayAudio() {
+    if (!eggAudio) return false;
+    try {
+      eggAudio.volume = 0.5;
+      await eggAudio.play(); // try autoplay
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  (async () => {
+    const ok = await tryPlayAudio();
+    if (!ok) {
+      showEnableBtn();
+    } else {
+      hideEnableBtn();
+    }
+  })();
+
+  if (enableBtn) {
+    enableBtn.addEventListener('click', async () => {
+      if (!eggAudio) return;
+      try {
+        eggAudio.volume = 0.5;
+        await eggAudio.play();
+      } catch(e){}
+      hideEnableBtn();
+    });
+  }
+
+  // Also try to auto-play once on first user gesture
+  function gestureAttempt() {
+    tryPlayAudio().then(ok=>{
+      if (ok) hideEnableBtn();
+      window.removeEventListener('pointerdown', gestureAttempt);
+      window.removeEventListener('keydown', gestureAttempt);
+      window.removeEventListener('touchstart', gestureAttempt);
+    });
+  }
+  window.addEventListener('pointerdown', gestureAttempt, { once: true });
+  window.addEventListener('keydown', gestureAttempt, { once: true });
+  window.addEventListener('touchstart', gestureAttempt, { once: true });
+
+  /* ---------------------------
+     Background: Canvas stars + soft nebula
+     (kept but reduced intensity to avoid interfering with text)
+     --------------------------- */
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let W = canvas.width = innerWidth;
+  let H = canvas.height = innerHeight;
+
+  const stars = [];
+  const STAR_COUNT = Math.floor((W*H)/60000 * 80) + 60;
+
+  function rand(min,max){return Math.random()*(max-min)+min}
+
+  function initStars(){
+    stars.length = 0;
+    for(let i=0;i<STAR_COUNT;i++){
+      stars.push({
+        x:Math.random()*W,
+        y:Math.random()*H,
+        r:rand(0.3,1.8),
+        vx:rand(-0.02,0.02),
+        vy:rand(-0.02,0.02),
+        phase:Math.random()*Math.PI*2,
+        shine:rand(0.1,0.9)
+      });
+    }
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // very subtle nebula gradient (lower alpha so text stays crisp)
+    const g = ctx.createRadialGradient(W*0.15,H*0.2,10,W*0.6,H*0.6,Math.max(W,H));
+    g.addColorStop(0,'rgba(134,227,206,0.02)');
+    g.addColorStop(0.5,'rgba(255,46,46,0.01)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+    // stars
+    for(let s of stars){
+      s.x += s.vx;
+      s.y += s.vy;
+      s.phase += 0.01;
+      if(s.x<0)s.x=W; if(s.x>W)s.x=0;
+      if(s.y<0)s.y=H; if(s.y>H)s.y=0;
+      const a = 0.5 + Math.sin(s.phase)*0.35;
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255,255,255,${a*s.shine})`;
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  initStars(); draw();
+
+  addEventListener('resize',()=>{
+    W = canvas.width = innerWidth;
+    H = canvas.height = innerHeight;
+    initStars();
+  });
+
+  /* ---------------------------
+     Shadow figure drift
+     --------------------------- */
+  const shadow = document.getElementById('shadow');
+  let sPos = 0;
+  function driftShadow(){
+    sPos += 0.002;
+    const x = Math.sin(sPos)*6; // percent
+    if (shadow) shadow.style.transform = `translateX(${x}%)`;
+    requestAnimationFrame(driftShadow);
+  }
+  driftShadow();
+
+  /* ---------------------------
+     Project actions: Omega -> discord, PaperVault -> site, Future -> modal
+     --------------------------- */
+  const omegaCard = document.getElementById('omegaCard');
+  const paperCard = document.getElementById('paperCard');
+  const futureCard = document.getElementById('futureCard');
+
+  if (omegaCard) omegaCard.addEventListener('click', ()=> {
+    window.open('https://discord.gg/Pyx4M3DxAu', '_blank', 'noopener');
+  });
+  if (paperCard) paperCard.addEventListener('click', ()=> {
+    window.open('https://papervault.github.io/vault/', '_blank', 'noopener');
+  });
+
+  // keep future opening modal as before
+  const modal = document.getElementById('modalBackdrop');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBody = document.getElementById('modalBody');
+  const modalLink = document.getElementById('modalLink');
+
+  if (futureCard) futureCard.addEventListener('click', ()=>{
+    openProject('future');
+  });
+
+  window.openProject = function openProject(key){
+    if(key==='omega'){
+      // fallback: open discord if called manually from console
+      window.open('https://discord.gg/Pyx4M3DxAu', '_blank', 'noopener');
+      return;
+    } else if(key==='papervault'){
+      window.open('https://papervault.github.io/vault/', '_blank', 'noopener');
+      return;
+    } else {
+      modalTitle.textContent = 'Future Projects';
+      modalBody.textContent = 'Working on multiplayer tools, automation bots, and creative web experiments. Stay tuned!';
+      modalLink.href = '#';
+      modalLink.textContent = 'Follow updates';
+      if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden','false'); }
+    }
+  };
+
+  window.closeModal = function closeModal(){
+    if (modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); }
+  };
+  if (modal) modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
+
+  /* ---------------------------
+     Copy email helper (exposed)
+     --------------------------- */
+  window.copyEmail = function copyEmail(){
+    navigator.clipboard?.writeText('arnav.og.16@gmail.com').then(()=>alert('Email copied to clipboard'));
+  };
+
+  /* ---------------------------
+     Konami code reveals lights + optional audio
+     --------------------------- */
+  const KONAMI = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
+  let kpos = 0;
+  const lights = document.getElementById('lights');
+
+  window.activateEaster = function activateEaster(){
+    if (lights) {
+      lights.classList.add('lights-on');
+      lights.style.transition = 'opacity .3s';
+      lights.style.opacity = '1';
+      if(eggAudio && eggAudio.src){
+        try{ eggAudio.currentTime = 0; eggAudio.play().catch(()=>{}); }catch(e){}
+      }
+      setTimeout(()=>{ if(lights) lights.style.opacity = '0.95'; },60);
+      setTimeout(()=>{ if(lights) lights.style.opacity = '0.0'; },15000);
+      setTimeout(()=>{ if(lights) lights.classList.remove('lights-on'); },16000);
+    }
+  };
+
+  document.addEventListener('keydown', (e)=>{
+    let key = e.key;
+    if (key) key = key.toLowerCase();
+    if(key === KONAMI[kpos]) {
+      kpos++;
+      if(kpos === KONAMI.length){
+        activateEaster();
+        kpos = 0;
+      }
+    } else {
+      kpos = (key === KONAMI[0]) ? 1 : 0;
+    }
+  });
+
+  /* ---------------------------
+     Optional: Audio on logo hover (keeps existing behavior)
+     --------------------------- */
+  const heroLogo = document.getElementById('heroLogo');
+  if (heroLogo){
+    heroLogo.addEventListener('mouseenter', ()=>{ if(eggAudio && eggAudio.src){ eggAudio.play().catch(()=>{}); } });
+    heroLogo.addEventListener('mouseleave', ()=>{ if(eggAudio){ eggAudio.pause(); eggAudio.currentTime = 0; } });
+  }
+
+  /* ---------------------------
+     Small accessibility: keyboard escape closes modal
+     --------------------------- */
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') closeModal();
+  });
+
+  /* ---------------------------
+     small debug: show logo error fallback
+     --------------------------- */
+  const siteLogo = document.getElementById('siteLogo');
+  if (siteLogo) siteLogo.addEventListener('error', function(){ this.style.opacity = 0.9; });
+
+  /* ---------------------------
+     gentle reveal on load
+     --------------------------- */
+  window.addEventListener('load', ()=>{ document.body.style.opacity = 1; });
+
+}); // DOMContentLoaded
+</script>
+</body>
+</html>
