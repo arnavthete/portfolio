@@ -27,19 +27,18 @@
   /* Background GIF (plays & blurred) - FIXED for mobile centering */
   #bgGif {
     position: fixed;
-    inset: 0;                 /* top:0; right:0; bottom:0; left:0; */
-    width: 100vw;             /* full viewport width */
-    height: 100vh;            /* full viewport height */
-    max-width: none;          /* override global img max-width */
-    max-height: none;         /* avoid unexpected scaling */
-    object-fit: cover;        /* crop to fill */
-    object-position: center center; /* explicit centering */
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    object-position: center center;
     z-index: 0;
     pointer-events: none;
-    /* "50% blurred" effect: blur + lower opacity — tweak px to taste */
     filter: blur(8px) saturate(0.95);
     opacity: 0.55;
-    transform: translateZ(0) scale(1.03); /* force GPU & avoid edge artifacts when blurring */
+    transform: translateZ(0) scale(1.03);
     will-change: transform, opacity, filter;
   }
 
@@ -58,7 +57,10 @@
     backdrop-filter: blur(6px);border-bottom:1px solid rgba(255,46,46,0.06)
   }
   .logo-wrap{display:flex;align-items:center;gap:12px}
-  .logo-wrap img{height:48px;border-radius:8px;filter:drop-shadow(0 4px 18px rgba(255,46,46,0.06))}
+  /* header brand images — larger on desktop */
+  .header-logo, .header-st { width:64px; height:64px; object-fit:contain; display:block }
+  .brand-x{font-family:'Press Start 2P', monospace; color:var(--neon); font-size:22px; line-height:1; letter-spacing:3px}
+  .logo-wrap img{border-radius:8px;filter:drop-shadow(0 6px 22px rgba(255,46,46,0.08))}
   .nav-links{margin-left:auto;display:flex;gap:12px;align-items:center}
   .nav-links a{padding:8px 12px;border-radius:8px;font-weight:600;color:var(--muted);transition:all .18s}
   .nav-links a:hover{color:#fff;transform:translateY(-2px)}
@@ -86,6 +88,21 @@
   .hero p{max-width:900px;margin:12px 0 16px;color:var(--muted);font-size:1.02rem;line-height:1.45}
 
   .hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+  /* Enable audio button - now inside header (above main hero logo) */
+  #enableAudioBtn {
+    display: none; /* shown only if autoplay fails */
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.2);
+    background: var(--neon-2);
+    color: #041016;
+    font-weight:700;
+    cursor: pointer;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    -webkit-tap-highlight-color: transparent;
+  }
 
   /* Layout sections */
   .container{max-width:1100px;margin:0 auto;padding:28px 18px;z-index:6;position:relative}
@@ -146,25 +163,6 @@
   .lights-row{width:100%;height:68px;background-image:linear-gradient(90deg, transparent 0 2%, rgba(255,255,255,0.03) 2% 6%);background-size:48px 100%}
   .lights-on{opacity:1;pointer-events:none;filter:drop-shadow(0 6px 28px rgba(255,46,46,0.18))}
 
-  /* ENABLE AUDIO BUTTON (center top, different colour) */
-  #enableAudioBtn {
-    position: fixed;
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 999;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,0.2);
-    background: var(--neon-2);
-    color: #041016;
-    font-weight:700;
-    display: none;
-    cursor: pointer;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.45);
-    -webkit-tap-highlight-color: transparent;
-  }
-
   /* responsive tweaks */
   @media (max-width:880px){
     .about-grid{grid-template-columns:1fr}
@@ -184,14 +182,12 @@
     .btn-ghost{padding:12px 14px;border-radius:10px;font-size:0.98rem}
     .soc-btn{padding:10px 14px}
     #enableAudioBtn{padding:12px 16px}
-    /* mobile: reinforce centering & viewport sizing for background GIF */
-    #bgGif{
-      object-position:center center !important;
-      width:100vw !important;
-      height:100vh !important;
-      filter: blur(6px) saturate(0.95);
-      opacity:0.62;
-    }
+    #bgGif{object-position:center center !important;width:100vw !important;height:100vh !important;filter: blur(6px) saturate(0.95);opacity:0.62}
+
+    /* header brand smaller and centered on mobile */
+    .header-logo, .header-st { width:48px; height:48px; }
+    .brand-x{font-size:18px}
+    .logo-wrap{margin:0 auto; justify-content:center}
   }
 </style>
 </head>
@@ -208,9 +204,13 @@
 
 <!-- NAV -->
 <nav>
-  <div class="logo-wrap">
-    <!-- your logo from the git URL -->
-    <img src="https://raw.githubusercontent.com/arnavthete/me/refs/heads/main/arnavscorelogo.png" alt="Arnav's Core logo" id="siteLogo" onerror="this.style.opacity=0.9">
+  <div class="logo-wrap" id="headerBrand">
+    <!-- Arnav logo -->
+    <img src="https://raw.githubusercontent.com/arnavthete/me/refs/heads/main/arnavscorelogo.png" alt="Arnav's Core logo" id="siteLogo" class="header-logo" onerror="this.style.opacity=0.9">
+    <!-- X separator -->
+    <div class="brand-x" aria-hidden="true">X</div>
+    <!-- Stranger Things logo -->
+    <img src="https://raw.githubusercontent.com/arnavthete/portfolio/refs/heads/main/st.png" alt="Stranger Things logo" class="header-st" id="stLogo" onerror="this.style.opacity=0.9">
   </div>
 
   <div class="nav-links">
@@ -223,6 +223,10 @@
 
 <!-- HERO -->
 <header class="hero">
+  <!-- ENABLE AUDIO BUTTON moved here (appears above main logo) -->
+  <button id="enableAudioBtn" aria-hidden="true">Enable audio</button>
+
+  <!-- main hero logo (big) -->
   <img src="https://raw.githubusercontent.com/arnavthete/me/refs/heads/main/arnavscorelogo.png" alt="Arnav logo" style="height:110px;max-width:70%;object-fit:contain" id="heroLogo">
   <!-- paragraph first -->
   <p>Projects, timeline, and hidden easter eggs. Explore or press the Konami code.</p>
@@ -345,12 +349,9 @@
 <!-- Background music: placed here and will attempt autoplay at 50% volume -->
 <audio id="eggAudio" src="audio/st.mp3" preload="auto" loop playsinline></audio>
 
-<!-- enable audio fallback button (center top, different colour) -->
-<button id="enableAudioBtn" aria-hidden="true">Enable audio</button>
-
 <script>
 /* Single-file enhanced script:
-   - try autoplay at 50% and show center-top enable button if blocked
+   - try autoplay at 50% and show the hero-placed enable button if blocked
    - ensure bg GIF plays by fetching it as a blob (cache-busted)
    - Konami + lights
    - Omega & PaperVault redirects
@@ -366,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showEnableBtn() {
     if (!enableBtn) return;
-    enableBtn.style.display = 'block';
+    enableBtn.style.display = 'inline-block';
     enableBtn.setAttribute('aria-hidden','false');
   }
   function hideEnableBtn() {
@@ -447,8 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // short reflow to nudge animation engines
       img.style.display = 'none';
       setTimeout(()=> img.style.display = '', 40);
-      // optional: revoke later if you want to free memory
-      // setTimeout(()=> URL.revokeObjectURL(url), 120000);
     } catch (err) {
       // fallback: try cache-busted src
       console.warn('Could not load bk.gif via blob — falling back to cache-busted src', err);
@@ -571,6 +570,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (heroLogo){
     heroLogo.addEventListener('mouseenter', ()=>{ if(eggAudio && eggAudio.src){ eggAudio.play().catch(()=>{}); } });
     heroLogo.addEventListener('mouseleave', ()=>{ if(eggAudio){ eggAudio.pause(); eggAudio.currentTime = 0; } });
+    // also add touch fallback for mobile: first tap will start audio (non-blocking)
+    heroLogo.addEventListener('touchstart', ()=>{ if(eggAudio){ eggAudio.play().catch(()=>{}); } }, { passive: true });
   }
 
   /* ---------------------------
@@ -585,6 +586,8 @@ document.addEventListener('DOMContentLoaded', () => {
      --------------------------- */
   const siteLogo = document.getElementById('siteLogo');
   if (siteLogo) siteLogo.addEventListener('error', function(){ this.style.opacity = 0.9; });
+  const stLogo = document.getElementById('stLogo');
+  if (stLogo) stLogo.addEventListener('error', function(){ this.style.opacity = 0.9; });
 
   /* ---------------------------
      gentle reveal on load
