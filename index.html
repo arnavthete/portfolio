@@ -24,19 +24,22 @@
   a {color:inherit;text-decoration:none}
   img {max-width:100%;display:block}
 
-  /* GIF background (plays & blurred) */
+  /* Background GIF (plays & blurred) - FIXED for mobile centering */
   #bgGif {
     position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    inset: 0;                 /* top:0; right:0; bottom:0; left:0; */
+    width: 100vw;             /* full viewport width */
+    height: 100vh;            /* full viewport height */
+    max-width: none;          /* override global img max-width */
+    max-height: none;         /* avoid unexpected scaling */
+    object-fit: cover;        /* crop to fill */
+    object-position: center center; /* explicit centering */
     z-index: 0;
     pointer-events: none;
     /* "50% blurred" effect: blur + lower opacity — tweak px to taste */
     filter: blur(8px) saturate(0.95);
     opacity: 0.55;
-    transform: scale(1.03); /* avoid edge artifacts when blurring */
+    transform: translateZ(0) scale(1.03); /* force GPU & avoid edge artifacts when blurring */
     will-change: transform, opacity, filter;
   }
 
@@ -181,7 +184,14 @@
     .btn-ghost{padding:12px 14px;border-radius:10px;font-size:0.98rem}
     .soc-btn{padding:10px 14px}
     #enableAudioBtn{padding:12px 16px}
-    #bgGif{filter: blur(6px) saturate(0.95); opacity:0.62}
+    /* mobile: reinforce centering & viewport sizing for background GIF */
+    #bgGif{
+      object-position:center center !important;
+      width:100vw !important;
+      height:100vh !important;
+      filter: blur(6px) saturate(0.95);
+      opacity:0.62;
+    }
   }
 </style>
 </head>
