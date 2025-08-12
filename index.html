@@ -189,6 +189,35 @@
     .btn-ghost{padding:12px 14px;border-radius:10px;font-size:0.98rem}
     .soc-btn{padding:10px 14px}
     #enableAudioBtn{padding:12px 16px}
+
+    /* --- Fix for timeline using whole width on mobile --- */
+    .about-grid {
+      grid-template-columns: 1fr !important; /* single column on mobile */
+      grid-template-rows: auto auto;         /* intro then timeline */
+      gap: 12px;
+      align-items: start;
+    }
+
+    /* Ensure each child uses the full width and doesn't keep stray margins */
+    .about-grid > * {
+      width: 100%;
+      margin: 0;
+    }
+
+    /* Make the timeline stretch and have comfortable padding on narrow screens */
+    .timeline {
+      width: 100%;
+      margin: 0;
+      box-sizing: border-box;
+      padding: 12px;
+    }
+
+    /* Tidy up timeline items for narrow layout */
+    .timeline-item {
+      padding-left: 10px;
+      border-left-width: 3px;
+      margin-bottom: 10px;
+    }
   }
 </style>
 </head>
