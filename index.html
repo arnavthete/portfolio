@@ -20,21 +20,27 @@
   }
 
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:var(--bg);color:#e6eef8;font-family:Inter,Orbitron,system-ui,Arial}
+  html,body{height:100%;margin:0;background:var(--bg);color:#e6eef8;font-family:Inter,Orbitron,system-ui,Arial;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
   a {color:inherit;text-decoration:none}
   img {max-width:100%;display:block}
 
-  /* Canvas is full-bleed background */
-  #bgCanvas{
-    position:fixed;
-    inset:0;
-    z-index:0;
-    pointer-events:none;
-    filter: blur(5px); /* blur the background so it doesn't interfere with text */
-    opacity:0.92;      /* tone down slightly */
+  /* GIF background (plays & blurred) */
+  #bgGif {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+    /* "50% blurred" effect: blur + lower opacity — tweak px to taste */
+    filter: blur(8px) saturate(0.95);
+    opacity: 0.55;
+    transform: scale(1.03); /* avoid edge artifacts when blurring */
+    will-change: transform, opacity, filter;
   }
 
-  /* subtle vignette */
+  /* subtle vignette — content sits above this */
   body::after{
     content:'';position:fixed;inset:0;pointer-events:none;
     background: radial-gradient(60% 60% at 20% 10%, rgba(255,255,255,0.01), transparent),
@@ -45,7 +51,7 @@
   /* Nav */
   nav{
     position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:18px;
-    padding:14px 20px;background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.15));
+    padding:12px 18px;background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.15));
     backdrop-filter: blur(6px);border-bottom:1px solid rgba(255,46,46,0.06)
   }
   .logo-wrap{display:flex;align-items:center;gap:12px}
@@ -62,6 +68,7 @@
     background: rgba(255,255,255,0.02);
     transition: all .18s;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
   .btn-ghost:hover{
     background: rgba(255,255,255,0.04);
@@ -71,23 +78,24 @@
   .small-muted{font-size:0.82rem;color:var(--muted)}
 
   /* Hero */
-  header.hero{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px 20px;position:relative;z-index:5}
+  header.hero{min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;position:relative;z-index:5}
   .hero h1{font-family:'Press Start 2P',sans-serif;color:var(--neon);font-size:1.35rem;margin:10px 0;text-shadow:0 0 12px rgba(255,46,46,0.12)}
-  .hero p{max-width:900px;margin:12px 0 22px;color:var(--muted);font-size:1.02rem;line-height:1.45}
+  .hero p{max-width:900px;margin:12px 0 16px;color:var(--muted);font-size:1.02rem;line-height:1.45}
 
   .hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 
   /* Layout sections */
-  .container{max-width:1100px;margin:0 auto;padding:36px 20px;z-index:6;position:relative}
-  section{margin-bottom:36px}
+  .container{max-width:1100px;margin:0 auto;padding:28px 18px;z-index:6;position:relative}
+  section{margin-bottom:32px}
 
   /* Projects grid */
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
   .card{
     background:linear-gradient(180deg,var(--glass),var(--glass-2));
-    border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);
+    border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.03);
     box-shadow: 0 6px 24px rgba(0,0,0,0.6);position:relative;overflow:hidden;
-    transition:transform .28s,box-shadow .28s;cursor:pointer
+    transition:transform .28s,box-shadow .28s;cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
   }
   .card:hover{transform:translateY(-8px);box-shadow:0 16px 42px rgba(0,0,0,0.7)}
   .card .title{font-family:Orbitron,Inter;font-weight:700;margin-bottom:8px;color:#fff}
@@ -121,7 +129,7 @@
   .chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted);font-weight:600;font-size:0.85rem;border:1px solid rgba(255,255,255,0.02)}
 
   /* Contact (social icons) */
-  .socials{display:flex;gap:14px;align-items:center;justify-content:center}
+  .socials{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
   .soc-btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);color:var(--muted);transition:all .15s}
   .soc-btn svg{width:18px;height:18px;display:block}
   .soc-btn:hover{transform:translateY(-4px);color:#fff}
@@ -134,12 +142,6 @@
   #lights{position:fixed;top:0;left:0;right:0;height:74px;display:flex;align-items:center;justify-content:center;z-index:70;pointer-events:none;opacity:0;transition:opacity .6s}
   .lights-row{width:100%;height:68px;background-image:linear-gradient(90deg, transparent 0 2%, rgba(255,255,255,0.03) 2% 6%);background-size:48px 100%}
   .lights-on{opacity:1;pointer-events:none;filter:drop-shadow(0 6px 28px rgba(255,46,46,0.18))}
-
-  @media (max-width:880px){
-    .about-grid{grid-template-columns:1fr}
-    .nav-links{display:none}
-    .hero h1{font-size:1.05rem}
-  }
 
   /* ENABLE AUDIO BUTTON (center top, different colour) */
   #enableAudioBtn {
@@ -157,13 +159,36 @@
     display: none;
     cursor: pointer;
     box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* responsive tweaks */
+  @media (max-width:880px){
+    .about-grid{grid-template-columns:1fr}
+    .nav-links{display:none}
+    .hero h1{font-size:1.05rem}
+  }
+
+  @media (max-width:600px){
+    nav{padding:10px 12px}
+    .logo-wrap img{height:40px}
+    header.hero{min-height:48vh;padding:18px 14px}
+    .hero p{font-size:0.95rem}
+    .hero h1{font-size:0.95rem;margin-top:8px}
+    .container{padding:18px 14px}
+    .grid{grid-template-columns:1fr;gap:12px}
+    .card{padding:12px}
+    .btn-ghost{padding:12px 14px;border-radius:10px;font-size:0.98rem}
+    .soc-btn{padding:10px 14px}
+    #enableAudioBtn{padding:12px 16px}
+    #bgGif{filter: blur(6px) saturate(0.95); opacity:0.62}
   }
 </style>
 </head>
 <body>
 
-<!-- Background canvas (stars/nebula) -->
-<canvas id="bgCanvas"></canvas>
+<!-- Background GIF (playable) -->
+<img id="bgGif" src="bk.gif" alt="background gif (bk.gif)">
 
 <!-- faint drifting 'creature' shadow -->
 <div class="shadow-figure" id="shadow"></div>
@@ -207,22 +232,22 @@
   <section id="projects">
     <h2 style="font-family:Orbitron">Projects</h2>
     <div class="grid" id="projectsGrid">
-      <!-- card: Omega (now redirects directly) -->
-      <div class="card" data-project="omega" id="omegaCard">
+      <!-- card: Omega (redirects directly) -->
+      <div class="card" data-project="omega" id="omegaCard" role="button" tabindex="0" aria-pressed="false">
         <div class="title">Ω Omega</div>
         <div class="desc">Custom Minecraft server — minigames, economy, community events and custom plugins.</div>
         <div class="meta"><span>Java / Spigot</span><span> • </span><span>Community</span></div>
       </div>
 
       <!-- card: Paper Vault (redirects directly) -->
-      <div class="card" data-project="papervault" id="paperCard">
+      <div class="card" data-project="papervault" id="paperCard" role="button" tabindex="0" aria-pressed="false">
         <div class="title">📚 The Paper Vault</div>
         <div class="desc">Educational portal for past papers, sample tests, and revision notes.</div>
         <div class="meta"><span>HTML/CSS/JS</span><span> • </span><span>Education</span></div>
       </div>
 
       <!-- card: future -->
-      <div class="card" data-project="future" id="futureCard">
+      <div class="card" data-project="future" id="futureCard" role="button" tabindex="0" aria-pressed="false">
         <div class="title">🔮 Future Projects</div>
         <div class="desc">Experimental projects, bots, and secret prototypes — coming soon.</div>
         <div class="meta"><span>Prototype</span></div>
@@ -235,7 +260,7 @@
     <h2 style="font-family:Orbitron">About & Timeline</h2>
     <div class="about-grid">
       <div>
-        <div style="background:linear-gradient(180deg,var(--glass),transparent);padding:14px;border-radius:10px;margin-bottom:16px">
+        <div style="background:linear-gradient(180deg,var(--glass),transparent);padding:12px;border-radius:10px;margin-bottom:16px">
           <strong style="font-family:Orbitron">Hi — I'm Arnav.</strong>
           <p class="small-muted" style="margin:8px 0 0">I build Minecraft worlds, educational sites, and creative internet experiments. I blend retro aesthetics with modern workflow.</p>
         </div>
@@ -247,7 +272,7 @@
         </div>
       </div>
 
-      <!-- Contact next to timeline removed as requested -->
+      <!-- Contact next to timeline intentionally removed -->
     </div>
   </section>
 
@@ -314,13 +339,18 @@
 <button id="enableAudioBtn" aria-hidden="true">Enable audio</button>
 
 <script>
-/* Single-file enhanced script (autoplay attempt + fallback button center-top,
-   blurred canvas, Konami, direct redirects for Omega & PaperVault, socials clickable,
-   removed Toggle Alternate View) */
+/* Single-file enhanced script:
+   - try autoplay at 50% and show center-top enable button if blocked
+   - ensure bg GIF plays by fetching it as a blob (cache-busted)
+   - Konami + lights
+   - Omega & PaperVault redirects
+   - mobile accessibility / keyboard handlers
+   - force audio looping and replay if ended
+*/
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ---------- Audio: try autoplay at 50% ---------- */
+  /* ---------- Audio: try autoplay at 50% + ensure looping ---------- */
   const eggAudio = document.getElementById('eggAudio');
   const enableBtn = document.getElementById('enableAudioBtn');
 
@@ -339,11 +369,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!eggAudio) return false;
     try {
       eggAudio.volume = 0.5;
+      eggAudio.loop = true; // ensure native loop flag
       await eggAudio.play(); // try autoplay
       return true;
     } catch (err) {
       return false;
     }
+  }
+
+  // Extra safety: if 'ended' fires for any reason, restart
+  if (eggAudio) {
+    eggAudio.addEventListener('ended', () => {
+      try {
+        eggAudio.currentTime = 0;
+        eggAudio.play().catch(()=>{});
+      } catch (e) {}
+    });
+    eggAudio.loop = true;
   }
 
   (async () => {
@@ -360,13 +402,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!eggAudio) return;
       try {
         eggAudio.volume = 0.5;
+        eggAudio.loop = true;
         await eggAudio.play();
       } catch(e){}
       hideEnableBtn();
     });
   }
 
-  // Also try to auto-play once on first user gesture
+  // Try again on first user gesture
   function gestureAttempt() {
     tryPlayAudio().then(ok=>{
       if (ok) hideEnableBtn();
@@ -380,64 +423,29 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('touchstart', gestureAttempt, { once: true });
 
   /* ---------------------------
-     Background: Canvas stars + soft nebula
-     (kept but reduced intensity to avoid interfering with text)
+     Ensure GIF plays: fetch as blob and set object URL (cache-bust)
      --------------------------- */
-  const canvas = document.getElementById('bgCanvas');
-  const ctx = canvas.getContext('2d');
-  let W = canvas.width = innerWidth;
-  let H = canvas.height = innerHeight;
-
-  const stars = [];
-  const STAR_COUNT = Math.floor((W*H)/60000 * 80) + 60;
-
-  function rand(min,max){return Math.random()*(max-min)+min}
-
-  function initStars(){
-    stars.length = 0;
-    for(let i=0;i<STAR_COUNT;i++){
-      stars.push({
-        x:Math.random()*W,
-        y:Math.random()*H,
-        r:rand(0.3,1.8),
-        vx:rand(-0.02,0.02),
-        vy:rand(-0.02,0.02),
-        phase:Math.random()*Math.PI*2,
-        shine:rand(0.1,0.9)
-      });
+  async function ensureGifPlays(){
+    const img = document.getElementById('bgGif');
+    if (!img) return;
+    try {
+      const resp = await fetch('bk.gif?cb=' + Date.now(), { cache: 'no-store' });
+      if (!resp.ok) throw new Error('GIF fetch failed: ' + resp.status);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      img.src = url;
+      // short reflow to nudge animation engines
+      img.style.display = 'none';
+      setTimeout(()=> img.style.display = '', 40);
+      // optional: revoke later if you want to free memory
+      // setTimeout(()=> URL.revokeObjectURL(url), 120000);
+    } catch (err) {
+      // fallback: try cache-busted src
+      console.warn('Could not load bk.gif via blob — falling back to cache-busted src', err);
+      img.src = 'bk.gif?cb=' + Date.now();
     }
   }
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    // very subtle nebula gradient (lower alpha so text stays crisp)
-    const g = ctx.createRadialGradient(W*0.15,H*0.2,10,W*0.6,H*0.6,Math.max(W,H));
-    g.addColorStop(0,'rgba(134,227,206,0.02)');
-    g.addColorStop(0.5,'rgba(255,46,46,0.01)');
-    g.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-
-    // stars
-    for(let s of stars){
-      s.x += s.vx;
-      s.y += s.vy;
-      s.phase += 0.01;
-      if(s.x<0)s.x=W; if(s.x>W)s.x=0;
-      if(s.y<0)s.y=H; if(s.y>H)s.y=0;
-      const a = 0.5 + Math.sin(s.phase)*0.35;
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(255,255,255,${a*s.shine})`;
-      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-  initStars(); draw();
-
-  addEventListener('resize',()=>{
-    W = canvas.width = innerWidth;
-    H = canvas.height = innerHeight;
-    initStars();
-  });
+  ensureGifPlays();
 
   /* ---------------------------
      Shadow figure drift
@@ -459,30 +467,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const paperCard = document.getElementById('paperCard');
   const futureCard = document.getElementById('futureCard');
 
-  if (omegaCard) omegaCard.addEventListener('click', ()=> {
-    window.open('https://discord.gg/Pyx4M3DxAu', '_blank', 'noopener');
-  });
-  if (paperCard) paperCard.addEventListener('click', ()=> {
-    window.open('https://papervault.github.io/vault/', '_blank', 'noopener');
-  });
+  function openUrl(url) {
+    window.open(url, '_blank', 'noopener');
+  }
 
-  // keep future opening modal as before
+  if (omegaCard) {
+    omegaCard.addEventListener('click', ()=> openUrl('https://discord.gg/Pyx4M3DxAu'));
+    omegaCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openUrl('https://discord.gg/Pyx4M3DxAu'); } });
+  }
+  if (paperCard) {
+    paperCard.addEventListener('click', ()=> openUrl('https://papervault.github.io/vault/'));
+    paperCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openUrl('https://papervault.github.io/vault/'); } });
+  }
+
+  // Future -> modal
   const modal = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
   const modalBody = document.getElementById('modalBody');
   const modalLink = document.getElementById('modalLink');
 
-  if (futureCard) futureCard.addEventListener('click', ()=>{
-    openProject('future');
-  });
+  if (futureCard) {
+    futureCard.addEventListener('click', ()=> openProject('future'));
+    futureCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProject('future'); } });
+  }
 
   window.openProject = function openProject(key){
     if(key==='omega'){
-      // fallback: open discord if called manually from console
-      window.open('https://discord.gg/Pyx4M3DxAu', '_blank', 'noopener');
+      openUrl('https://discord.gg/Pyx4M3DxAu');
       return;
     } else if(key==='papervault'){
-      window.open('https://papervault.github.io/vault/', '_blank', 'noopener');
+      openUrl('https://papervault.github.io/vault/');
       return;
     } else {
       modalTitle.textContent = 'Future Projects';
