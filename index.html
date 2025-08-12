@@ -24,7 +24,7 @@
   a {color:inherit;text-decoration:none}
   img {max-width:100%;display:block}
 
-  /* Background GIF (plays & blurred) - FIXED for mobile centering */
+  /* Background GIF (plays & blurred) - fixed for mobile centering */
   #bgGif {
     position: fixed;
     inset: 0;
@@ -562,17 +562,6 @@ document.addEventListener('DOMContentLoaded', () => {
       kpos = (key === KONAMI[0]) ? 1 : 0;
     }
   });
-
-  /* ---------------------------
-     Optional: Audio on logo hover (keeps existing behavior)
-     --------------------------- */
-  const heroLogo = document.getElementById('heroLogo');
-  if (heroLogo){
-    heroLogo.addEventListener('mouseenter', ()=>{ if(eggAudio && eggAudio.src){ eggAudio.play().catch(()=>{}); } });
-    heroLogo.addEventListener('mouseleave', ()=>{ if(eggAudio){ eggAudio.pause(); eggAudio.currentTime = 0; } });
-    // also add touch fallback for mobile: first tap will start audio (non-blocking)
-    heroLogo.addEventListener('touchstart', ()=>{ if(eggAudio){ eggAudio.play().catch(()=>{}); } }, { passive: true });
-  }
 
   /* ---------------------------
      Small accessibility: keyboard escape closes modal
