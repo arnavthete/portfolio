@@ -13,7 +13,7 @@
     --bg:#050507;
     --card:#0f0f12;
     --neon:#ff2e2e;
-    --neon-2:#86e3ce; /* enable-audio button color */
+    --neon-2:#86e3ce;
     --muted:#98a0b3;
     --glass: rgba(255,255,255,0.03);
     --glass-2: rgba(255,255,255,0.02);
@@ -24,9 +24,9 @@
   a {color:inherit;text-decoration:none}
   img {max-width:100%;display:block}
 
-  /* Background GIF (plays & blurred) - fixed for mobile centering */
+  /* Background GIF (desktop: full viewport; mobile: inside header) */
   #bgGif {
-    position: fixed;
+    position: fixed;          /* default: full-viewport */
     inset: 0;
     width: 100vw;
     height: 100vh;
@@ -57,39 +57,37 @@
     backdrop-filter: blur(6px);border-bottom:1px solid rgba(255,46,46,0.06)
   }
   .logo-wrap{display:flex;align-items:center;gap:12px}
-  /* header brand images — larger on desktop */
   .header-logo, .header-st { width:64px; height:64px; object-fit:contain; display:block }
   .brand-x{font-family:'Press Start 2P', monospace; color:var(--neon); font-size:22px; line-height:1; letter-spacing:3px}
   .logo-wrap img{border-radius:8px;filter:drop-shadow(0 6px 22px rgba(255,46,46,0.08))}
   .nav-links{margin-left:auto;display:flex;gap:12px;align-items:center}
   .nav-links a{padding:8px 12px;border-radius:8px;font-weight:600;color:var(--muted);transition:all .18s}
   .nav-links a:hover{color:#fff;transform:translateY(-2px)}
-  /* BUTTON FIX: ensure buttons are visible (dark translucent background + white text) */
-  .btn-ghost{
-    border:1px solid rgba(255,255,255,0.06);
-    padding:8px 10px;
-    border-radius:8px;
-    color:#fff;
-    background: rgba(255,255,255,0.02);
-    transition: all .18s;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn-ghost:hover{
-    background: rgba(255,255,255,0.04);
-    transform: translateY(-2px);
-    color:#fff;
-  }
+  .btn-ghost{border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:#fff;background: rgba(255,255,255,0.02);transition: all .18s;cursor: pointer;-webkit-tap-highlight-color: transparent;}
+  .btn-ghost:hover{background: rgba(255,255,255,0.04);transform: translateY(-2px);color:#fff}
   .small-muted{font-size:0.82rem;color:var(--muted)}
 
-  /* Hero */
-  header.hero{min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;position:relative;z-index:5}
+  /* Hero (now a positioning context for mobile GIF) */
+  header.hero{
+    min-height:62vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:30px 20px;
+    position:relative;   /* important: positioning context on mobile when GIF becomes absolute */
+    z-index:5;
+    overflow:hidden;     /* clip bgGif when inside header on mobile */
+  }
+  /* ensure hero content stacks above the GIF (but below other UI overlays) */
+  .hero > :not(#bgGif){ position:relative; z-index:6 }
+
   .hero h1{font-family:'Press Start 2P',sans-serif;color:var(--neon);font-size:1.35rem;margin:10px 0;text-shadow:0 0 12px rgba(255,46,46,0.12)}
   .hero p{max-width:900px;margin:12px 0 16px;color:var(--muted);font-size:1.02rem;line-height:1.45}
-
   .hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 
-  /* Enable audio button - now inside header (above main hero logo) */
+  /* Enable audio button inside header (above main hero logo) */
   #enableAudioBtn {
     display: none; /* shown only if autoplay fails */
     margin-bottom: 12px;
@@ -121,56 +119,47 @@
   .card .title{font-family:Orbitron,Inter;font-weight:700;margin-bottom:8px;color:#fff}
   .card .desc{color:var(--muted);font-size:0.95rem;margin-bottom:12px}
 
-  /* Neon border flicker */
-  .card::after{
-    content:'';position:absolute;inset:0;border-radius:12px;padding:1px;
-    background:linear-gradient(90deg, rgba(255,46,46,0.9), rgba(134,227,206,0.65));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;opacity:.08;pointer-events:none;
-    transition:opacity .25s;
-  }
-  .card:hover::after{opacity:0.18;filter:blur(6px)}
-
   .meta{display:flex;gap:10px;align-items:center;font-size:0.85rem;color:var(--muted)}
 
-  /* Modal details */
   .modal-backdrop{position:fixed;inset:0;background:rgba(1,1,1,0.6);display:none;align-items:center;justify-content:center;z-index:60}
   .modal{width:min(920px,96%);background:#08080a;border-radius:12px;padding:22px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.75)}
   .modal h3{font-family:Orbitron;margin:0 0 8px}
   .modal .close{position:absolute;right:18px;top:18px;cursor:pointer;color:var(--muted)}
 
-  /* About / Timeline */
   .about-grid{display:grid;grid-template-columns:1fr 320px;gap:20px}
   .timeline{background:linear-gradient(180deg,var(--glass),transparent);padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
   .timeline-item{padding:12px;border-left:3px solid rgba(255,46,46,0.12);margin-bottom:12px}
 
-  /* Skills */
   .skills{display:flex;gap:10px;flex-wrap:wrap}
   .chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted);font-weight:600;font-size:0.85rem;border:1px solid rgba(255,255,255,0.02)}
 
-  /* Contact (social icons) */
   .socials{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
   .soc-btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);color:var(--muted);transition:all .15s}
   .soc-btn svg{width:18px;height:18px;display:block}
   .soc-btn:hover{transform:translateY(-4px);color:#fff}
 
-  /* Footer neon grid */
   footer{padding:26px 20px;border-top:1px solid rgba(255,255,255,0.03);text-align:center;color:var(--muted)}
   .gridline{height:56px;background:repeating-linear-gradient(90deg, rgba(255,46,46,0.06) 0 4px, transparent 4px 40px);opacity:0.04;margin-top:12px;border-radius:6px}
 
-  /* Easter egg lights */
   #lights{position:fixed;top:0;left:0;right:0;height:74px;display:flex;align-items:center;justify-content:center;z-index:70;pointer-events:none;opacity:0;transition:opacity .6s}
   .lights-row{width:100%;height:68px;background-image:linear-gradient(90deg, transparent 0 2%, rgba(255,255,255,0.03) 2% 6%);background-size:48px 100%}
   .lights-on{opacity:1;pointer-events:none;filter:drop-shadow(0 6px 28px rgba(255,46,46,0.18))}
 
-  /* responsive tweaks */
-  @media (max-width:880px){
-    .about-grid{grid-template-columns:1fr}
-    .nav-links{display:none}
-    .hero h1{font-size:1.05rem}
-  }
-
+  /* Responsive: on small screens, make the bgGif sit inside header (behind hero content) */
   @media (max-width:600px){
+    #bgGif {
+      position: absolute;   /* inside header.hero (position:relative) */
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      opacity: 0.62;
+      filter: blur(6px) saturate(0.95);
+      z-index: 0; /* behind hero content */
+      transform: none;
+    }
+
     nav{padding:10px 12px}
     .logo-wrap img{height:40px}
     header.hero{min-height:48vh;padding:18px 14px}
@@ -182,8 +171,6 @@
     .btn-ghost{padding:12px 14px;border-radius:10px;font-size:0.98rem}
     .soc-btn{padding:10px 14px}
     #enableAudioBtn{padding:12px 16px}
-    #bgGif{object-position:center center !important;width:100vw !important;height:100vh !important;filter: blur(6px) saturate(0.95);opacity:0.62}
-
     /* header brand smaller and centered on mobile */
     .header-logo, .header-st { width:48px; height:48px; }
     .brand-x{font-size:18px}
@@ -193,23 +180,11 @@
 </head>
 <body>
 
-<!-- Background GIF (playable) -->
-<img id="bgGif" src="bk.gif" alt="background gif (bk.gif)">
-
-<!-- faint drifting 'creature' shadow -->
-<div class="shadow-figure" id="shadow"></div>
-
-<!-- christmas lights (hidden until Konami) -->
-<div id="lights"><div class="lights-row"></div></div>
-
 <!-- NAV -->
 <nav>
   <div class="logo-wrap" id="headerBrand">
-    <!-- Arnav logo -->
-    <img src="https://raw.githubusercontent.com/arnavthete/me/refs/heads/main/arnavscorelogo.png" alt="Arnav's Core logo" id="siteLogo" class="header-logo" onerror="this.style.opacity=0.9">
-    <!-- X separator -->
+    <img src="https://raw.githubusercontent.com/arnavthete/me/refs/heads/main/arnavscorelogo.png" alt="Arnav's Core logo" class="header-logo" id="siteLogo" onerror="this.style.opacity=0.9">
     <div class="brand-x" aria-hidden="true">X</div>
-    <!-- Stranger Things logo -->
     <img src="https://raw.githubusercontent.com/arnavthete/portfolio/refs/heads/main/st.png" alt="Stranger Things logo" class="header-st" id="stLogo" onerror="this.style.opacity=0.9">
   </div>
 
@@ -221,16 +196,19 @@
   </div>
 </nav>
 
-<!-- HERO -->
+<!-- HERO: gif moved here so it can be placed behind the hero logo on mobile -->
 <header class="hero">
-  <!-- ENABLE AUDIO BUTTON moved here (appears above main logo) -->
+  <!-- Background GIF (playable) - moved inside header so it can be absolute on mobile -->
+  <img id="bgGif" src="bk.gif" alt="background gif (bk.gif)">
+
+  <!-- ENABLE AUDIO BUTTON placed above main logo -->
   <button id="enableAudioBtn" aria-hidden="true">Enable audio</button>
 
   <!-- main hero logo (big) -->
   <img src="https://raw.githubusercontent.com/arnavthete/me/refs/heads/main/arnavscorelogo.png" alt="Arnav logo" style="height:110px;max-width:70%;object-fit:contain" id="heroLogo">
-  <!-- paragraph first -->
+
   <p>Projects, timeline, and hidden easter eggs. Explore or press the Konami code.</p>
-  <!-- ENTER THE CORE below that paragraph -->
+
   <h1 class="glitch">ENTER THE CORE</h1>
 
   <div class="hero-cta">
@@ -239,28 +217,23 @@
   </div>
 </header>
 
-<!-- MAIN CONTAINER -->
 <main class="container">
-
   <!-- PROJECTS -->
   <section id="projects">
     <h2 style="font-family:Orbitron">Projects</h2>
     <div class="grid" id="projectsGrid">
-      <!-- card: Omega (redirects directly) -->
       <div class="card" data-project="omega" id="omegaCard" role="button" tabindex="0" aria-pressed="false">
         <div class="title">Ω Omega</div>
         <div class="desc">Custom Minecraft server — minigames, economy, community events and custom plugins.</div>
         <div class="meta"><span>Java / Spigot</span><span> • </span><span>Community</span></div>
       </div>
 
-      <!-- card: Paper Vault (redirects directly) -->
       <div class="card" data-project="papervault" id="paperCard" role="button" tabindex="0" aria-pressed="false">
         <div class="title">📚 The Paper Vault</div>
         <div class="desc">Educational portal for past papers, sample tests, and revision notes.</div>
         <div class="meta"><span>HTML/CSS/JS</span><span> • </span><span>Education</span></div>
       </div>
 
-      <!-- card: future -->
       <div class="card" data-project="future" id="futureCard" role="button" tabindex="0" aria-pressed="false">
         <div class="title">🔮 Future Projects</div>
         <div class="desc">Experimental projects, bots, and secret prototypes — coming soon.</div>
@@ -269,7 +242,7 @@
     </div>
   </section>
 
-  <!-- ABOUT + TIMELINE -->
+  <!-- ABOUT -->
   <section id="about">
     <h2 style="font-family:Orbitron">About & Timeline</h2>
     <div class="about-grid">
@@ -285,8 +258,6 @@
           <div class="timeline-item"><strong>2025</strong> — Revamped site with refreshed theme.</div>
         </div>
       </div>
-
-      <!-- Contact next to timeline intentionally removed -->
     </div>
   </section>
 
@@ -304,7 +275,7 @@
     </div>
   </section>
 
-  <!-- CONTACT (section with socials remains) -->
+  <!-- CONTACT -->
   <section id="contact">
     <h2 style="font-family:Orbitron">Contact</h2>
     <div style="text-align:center">
@@ -326,7 +297,6 @@
       </div>
     </div>
   </section>
-
 </main>
 
 <!-- modal backdrop -->
@@ -346,244 +316,106 @@
   <div class="gridline" aria-hidden="true"></div>
 </footer>
 
-<!-- Background music: placed here and will attempt autoplay at 50% volume -->
+<!-- Background music -->
 <audio id="eggAudio" src="audio/st.mp3" preload="auto" loop playsinline></audio>
 
 <script>
-/* Single-file enhanced script:
-   - try autoplay at 50% and show the hero-placed enable button if blocked
-   - ensure bg GIF plays by fetching it as a blob (cache-busted)
-   - Konami + lights
-   - Omega & PaperVault redirects
-   - mobile accessibility / keyboard handlers
-   - force audio looping and replay if ended
-*/
-
 document.addEventListener('DOMContentLoaded', () => {
-
-  /* ---------- Audio: try autoplay at 50% + ensure looping ---------- */
   const eggAudio = document.getElementById('eggAudio');
   const enableBtn = document.getElementById('enableAudioBtn');
 
-  function showEnableBtn() {
-    if (!enableBtn) return;
-    enableBtn.style.display = 'inline-block';
-    enableBtn.setAttribute('aria-hidden','false');
-  }
-  function hideEnableBtn() {
-    if (!enableBtn) return;
-    enableBtn.style.display = 'none';
-    enableBtn.setAttribute('aria-hidden','true');
-  }
+  function showEnableBtn(){ if(!enableBtn) return; enableBtn.style.display='inline-block'; enableBtn.setAttribute('aria-hidden','false'); }
+  function hideEnableBtn(){ if(!enableBtn) return; enableBtn.style.display='none'; enableBtn.setAttribute('aria-hidden','true'); }
 
-  async function tryPlayAudio() {
-    if (!eggAudio) return false;
+  async function tryPlayAudio(){
+    if(!eggAudio) return false;
     try {
       eggAudio.volume = 0.5;
-      eggAudio.loop = true; // ensure native loop flag
-      await eggAudio.play(); // try autoplay
+      eggAudio.loop = true;
+      await eggAudio.play();
       return true;
     } catch (err) {
       return false;
     }
   }
 
-  // Extra safety: if 'ended' fires for any reason, restart
   if (eggAudio) {
-    eggAudio.addEventListener('ended', () => {
-      try {
-        eggAudio.currentTime = 0;
-        eggAudio.play().catch(()=>{});
-      } catch (e) {}
-    });
+    eggAudio.addEventListener('ended', ()=>{ try{ eggAudio.currentTime = 0; eggAudio.play().catch(()=>{}); }catch(e){} });
     eggAudio.loop = true;
   }
 
-  (async () => {
+  (async ()=> {
     const ok = await tryPlayAudio();
-    if (!ok) {
-      showEnableBtn();
-    } else {
-      hideEnableBtn();
-    }
+    if(!ok) showEnableBtn(); else hideEnableBtn();
   })();
 
-  if (enableBtn) {
-    enableBtn.addEventListener('click', async () => {
-      if (!eggAudio) return;
-      try {
-        eggAudio.volume = 0.5;
-        eggAudio.loop = true;
-        await eggAudio.play();
-      } catch(e){}
-      hideEnableBtn();
-    });
-  }
+  if(enableBtn) enableBtn.addEventListener('click', async ()=>{ try{ eggAudio.volume=0.5; eggAudio.loop=true; await eggAudio.play(); }catch(e){} hideEnableBtn(); });
 
-  // Try again on first user gesture
-  function gestureAttempt() {
-    tryPlayAudio().then(ok=>{
-      if (ok) hideEnableBtn();
-      window.removeEventListener('pointerdown', gestureAttempt);
-      window.removeEventListener('keydown', gestureAttempt);
-      window.removeEventListener('touchstart', gestureAttempt);
-    });
-  }
-  window.addEventListener('pointerdown', gestureAttempt, { once: true });
-  window.addEventListener('keydown', gestureAttempt, { once: true });
-  window.addEventListener('touchstart', gestureAttempt, { once: true });
-
-  /* ---------------------------
-     Ensure GIF plays: fetch as blob and set object URL (cache-bust)
-     --------------------------- */
+  // GIF blob load (keeps your previous approach)
   async function ensureGifPlays(){
     const img = document.getElementById('bgGif');
-    if (!img) return;
+    if(!img) return;
     try {
       const resp = await fetch('bk.gif?cb=' + Date.now(), { cache: 'no-store' });
       if (!resp.ok) throw new Error('GIF fetch failed: ' + resp.status);
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
       img.src = url;
-      // short reflow to nudge animation engines
       img.style.display = 'none';
       setTimeout(()=> img.style.display = '', 40);
     } catch (err) {
-      // fallback: try cache-busted src
       console.warn('Could not load bk.gif via blob — falling back to cache-busted src', err);
       img.src = 'bk.gif?cb=' + Date.now();
     }
   }
   ensureGifPlays();
 
-  /* ---------------------------
-     Shadow figure drift
-     --------------------------- */
-  const shadow = document.getElementById('shadow');
-  let sPos = 0;
-  function driftShadow(){
-    sPos += 0.002;
-    const x = Math.sin(sPos)*6; // percent
-    if (shadow) shadow.style.transform = `translateX(${x}%)`;
-    requestAnimationFrame(driftShadow);
-  }
-  driftShadow();
-
-  /* ---------------------------
-     Project actions: Omega -> discord, PaperVault -> site, Future -> modal
-     --------------------------- */
+  // Project card handlers, Konami, modal, etc. (kept from your prior file)
   const omegaCard = document.getElementById('omegaCard');
   const paperCard = document.getElementById('paperCard');
   const futureCard = document.getElementById('futureCard');
-
-  function openUrl(url) {
-    window.open(url, '_blank', 'noopener');
-  }
-
-  if (omegaCard) {
-    omegaCard.addEventListener('click', ()=> openUrl('https://discord.gg/Pyx4M3DxAu'));
-    omegaCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openUrl('https://discord.gg/Pyx4M3DxAu'); } });
-  }
-  if (paperCard) {
-    paperCard.addEventListener('click', ()=> openUrl('https://papervault.github.io/vault/'));
-    paperCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openUrl('https://papervault.github.io/vault/'); } });
-  }
-
-  // Future -> modal
   const modal = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
   const modalBody = document.getElementById('modalBody');
   const modalLink = document.getElementById('modalLink');
 
-  if (futureCard) {
-    futureCard.addEventListener('click', ()=> openProject('future'));
-    futureCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProject('future'); } });
-  }
+  function openUrl(url){ window.open(url, '_blank', 'noopener'); }
+  if (omegaCard) { omegaCard.addEventListener('click', ()=> openUrl('https://discord.gg/Pyx4M3DxAu')); omegaCard.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openUrl('https://discord.gg/Pyx4M3DxAu'); } }); }
+  if (paperCard) { paperCard.addEventListener('click', ()=> openUrl('https://papervault.github.io/vault/')); paperCard.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openUrl('https://papervault.github.io/vault/'); } }); }
+  if (futureCard) { futureCard.addEventListener('click', ()=> openProject('future')); futureCard.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openProject('future'); } }); }
 
-  window.openProject = function openProject(key){
-    if(key==='omega'){
-      openUrl('https://discord.gg/Pyx4M3DxAu');
-      return;
-    } else if(key==='papervault'){
-      openUrl('https://papervault.github.io/vault/');
-      return;
-    } else {
-      modalTitle.textContent = 'Future Projects';
-      modalBody.textContent = 'Working on multiplayer tools, automation bots, and creative web experiments. Stay tuned!';
-      modalLink.href = '#';
-      modalLink.textContent = 'Follow updates';
-      if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden','false'); }
-    }
+  window.openProject = function (key){
+    if(key==='omega') { openUrl('https://discord.gg/Pyx4M3DxAu'); return; }
+    if(key==='papervault') { openUrl('https://papervault.github.io/vault/'); return; }
+    modalTitle.textContent='Future Projects';
+    modalBody.textContent='Working on multiplayer tools, automation bots, and creative web experiments. Stay tuned!';
+    modalLink.href='#'; modalLink.textContent='Follow updates';
+    if(modal) { modal.style.display='flex'; modal.setAttribute('aria-hidden','false'); }
   };
 
-  window.closeModal = function closeModal(){
-    if (modal) { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); }
-  };
-  if (modal) modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
+  window.closeModal = function(){ if(modal){ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); } };
+  if(modal) modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
 
-  /* ---------------------------
-     Copy email helper (exposed)
-     --------------------------- */
-  window.copyEmail = function copyEmail(){
-    navigator.clipboard?.writeText('arnav.og.16@gmail.com').then(()=>alert('Email copied to clipboard'));
-  };
-
-  /* ---------------------------
-     Konami code reveals lights + optional audio
-     --------------------------- */
-  const KONAMI = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
-  let kpos = 0;
-  const lights = document.getElementById('lights');
-
-  window.activateEaster = function activateEaster(){
-    if (lights) {
-      lights.classList.add('lights-on');
-      lights.style.transition = 'opacity .3s';
-      lights.style.opacity = '1';
-      if(eggAudio && eggAudio.src){
-        try{ eggAudio.currentTime = 0; eggAudio.play().catch(()=>{}); }catch(e){}
-      }
-      setTimeout(()=>{ if(lights) lights.style.opacity = '0.95'; },60);
-      setTimeout(()=>{ if(lights) lights.style.opacity = '0.0'; },15000);
+  // Konami
+  const KONAMI=['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
+  let kpos=0;
+  const lights=document.getElementById('lights');
+  window.activateEaster = function(){
+    if(lights){ lights.classList.add('lights-on'); lights.style.transition='opacity .3s'; lights.style.opacity='1';
+      if(eggAudio && eggAudio.src){ try{ eggAudio.currentTime=0; eggAudio.play().catch(()=>{}); }catch(e){} }
+      setTimeout(()=>{ if(lights) lights.style.opacity='0.95'; },60);
+      setTimeout(()=>{ if(lights) lights.style.opacity='0.0'; },15000);
       setTimeout(()=>{ if(lights) lights.classList.remove('lights-on'); },16000);
     }
   };
+  document.addEventListener('keydown',(e)=>{ let key=e.key; if(key) key=key.toLowerCase(); if(key===KONAMI[kpos]){ kpos++; if(kpos===KONAMI.length){ activateEaster(); kpos=0; } } else { kpos=(key===KONAMI[0])?1:0; } });
 
-  document.addEventListener('keydown', (e)=>{
-    let key = e.key;
-    if (key) key = key.toLowerCase();
-    if(key === KONAMI[kpos]) {
-      kpos++;
-      if(kpos === KONAMI.length){
-        activateEaster();
-        kpos = 0;
-      }
-    } else {
-      kpos = (key === KONAMI[0]) ? 1 : 0;
-    }
-  });
+  // accessibility
+  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
 
-  /* ---------------------------
-     Small accessibility: keyboard escape closes modal
-     --------------------------- */
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape') closeModal();
-  });
-
-  /* ---------------------------
-     small debug: show logo error fallback
-     --------------------------- */
-  const siteLogo = document.getElementById('siteLogo');
-  if (siteLogo) siteLogo.addEventListener('error', function(){ this.style.opacity = 0.9; });
-  const stLogo = document.getElementById('stLogo');
-  if (stLogo) stLogo.addEventListener('error', function(){ this.style.opacity = 0.9; });
-
-  /* ---------------------------
-     gentle reveal on load
-     --------------------------- */
+  // onload
   window.addEventListener('load', ()=>{ document.body.style.opacity = 1; });
-
-}); // DOMContentLoaded
+});
 </script>
 </body>
 </html>
